@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SZIGRA.Enums;
 
 namespace SZIGRA.Algorithm
 {
@@ -13,68 +14,26 @@ namespace SZIGRA.Algorithm
         public TicTacToeMiniMax(double alpha, double beta, int maxDepth) : base(alpha, beta, maxDepth)
         {
         }
-
         public override double Evaluate(FieldStateEnum[,] gameState, bool maximizingPlayer)
         {
-            var playerToEvaluate = maximizingPlayer ? FieldStateEnum.OccupiedByPlayer2 : FieldStateEnum.OccupiedByPlayer1;
-            var opponent = maximizingPlayer ? FieldStateEnum.OccupiedByPlayer1 : FieldStateEnum.OccupiedByPlayer2;
+            var gameResult = GetGameResult(gameState);
 
-            if (HasWon(opponent, gameState))
+            var playerResult = maximizingPlayer ? GameResultEnum.Player1Won : GameResultEnum.Player2Won;
+            var opponentResult = maximizingPlayer ? GameResultEnum.Player2Won : GameResultEnum.Player1Won;
+
+            if (gameResult == playerResult)
             {
-                return double.NegativeInfinity;
+                return 1;
             }
 
-            if (HasWon(playerToEvaluate, gameState))
+            if (gameResult == opponentResult)
             {
-                return double.PositiveInfinity;
+                return -1;
             }
 
-            if (HasEmptyFields(gameState))
-            {
-                return 0;
-            }
-
-            //jak oceniac?
+            return 0;
         }
-        //czy na pewno w tej klasie?
 
-        double EvaluateWindow(FieldStateEnum[] windowGameState, FieldStateEnum player)
-        {
-            //jaka heurystyka??
-            var emptyFields = 0;
-            var playerFields = 0;
-            var opponentFields = 0;
-            for (var i = 0; i < windowGameState.Length; i++)
-            {
-                switch (windowGameState[i])
-                {
-                    case FieldStateEnum.OccupiedByPlayer1: playerFields++; break;
-                    case FieldStateEnum.OccupiedByPlayer2: opponentFields++; break;
-                    case FieldStateEnum.Empty: emptyFields++; break;
-                };
-            }
-
-            //winning sequence
-            if(playerFields == windowGameState.Length)
-            {
-                return 100;
-            }
-
-            //almost winning
-            if(playerFields == windowGameState.Length - 1 && emptyFields == 1)
-            {
-                return 5;
-            }
-
-            //close to losing
-            if(emptyFields == 1 && opponentFields == windowGameState.Length - 1)
-            {
-                return -4;
-            }
-            
-            //normal move
-            return 2;
-        }
         public override IEnumerable<FieldStateEnum[,]> GetAvailableStates(FieldStateEnum[,] gameState, bool maximizingPlayer)
         {
             var playerToMove = maximizingPlayer ? FieldStateEnum.OccupiedByPlayer2 : FieldStateEnum.OccupiedByPlayer1;
@@ -83,99 +42,100 @@ namespace SZIGRA.Algorithm
             {
                 for (var j = 0; j < gameState.GetLength(1); j++)
                 {
+
                     if (gameState[i, j] == FieldStateEnum.Empty)
                     {
-                        var boardCopy = (FieldStateEnum[,])gameState.Clone();
-                        boardCopy[i, j] = playerToMove;
-
-                        yield return boardCopy;
+                        var gameStateCopy = (FieldStateEnum[,])gameState.Clone();
+                        gameStateCopy[i, j] = playerToMove;
+                        yield return gameStateCopy;
                     }
                 }
             }
         }
-        //czy metoda, w której są już użyte zasady gry powinna na pewno być w minimax?
-        //czy to powinna być odpowiedzialność innej klasy? (np. game)
-        bool HasWon(FieldStateEnum player, FieldStateEnum[,] gameState)
+
+        GameResultEnum GetGameResult(FieldStateEnum[,] gameState)
         {
-            /*
-             Winning combinations:
-             
-                XXX --- ---
-                --- XXX ---
-                --- --- XXX
-            
-                X-- -X- --X
-                X-- -X- --X
-                X-- -X- --X
+            var anyFieldIsEmpty = false;
+            (int h, int v, int diag, int antidiag) player1 = (0, 0, 0, 0);
+            (int h, int v, int diag, int antidiag) player2 = (0, 0, 0, 0);
 
-                X-- --X 
-                -X- -X- 
-                --X X-- 
-
-             */
-            var rightSlope = 0;
-            var leftSlope = 0;
-            //horizontal && vertical 
-            for (var i = 0; i < gameState.GetLength(0); i++)
+            var gameStateRows = gameState.GetLength(0);
+            var gameStateColumns = gameState.GetLength(1);
+            for (var i = 0; i < gameStateRows; i++)
             {
-                var horizontal = 0;
-                var vertical = 0;
-
-                for (var j = 0; j < gameState.GetLength(1); j++)
+                player1.h = player1.v = player2.h = player2.v = 0;
+                for (var j = 0; j < gameStateColumns; j++)
                 {
-                    if (gameState[i, j] == player)
+                    switch (gameState[i, j])
                     {
-                        horizontal++;
+                        case FieldStateEnum.Empty:
+                            anyFieldIsEmpty = true;
+                            break;
+                        case FieldStateEnum.OccupiedByPlayer1:
+                            player1.h++;
+                            break;
+                        case FieldStateEnum.OccupiedByPlayer2:
+                            player2.h++;
+                            break;
                     }
-                    if (gameState[j, i] == player)
+                    switch (gameState[j, i])
                     {
-                        vertical++;
+                        case FieldStateEnum.Empty:
+                            anyFieldIsEmpty = true;
+                            break;
+                        case FieldStateEnum.OccupiedByPlayer1:
+                            player1.v++;
+                            break;
+                        case FieldStateEnum.OccupiedByPlayer2:
+                            player2.v++;
+                            break;
                     }
                 }
 
-                if (horizontal == gameState.GetLength(0) || vertical == gameState.GetLength(0))
+                if (player1.h == gameStateRows || player1.v == gameStateColumns)
                 {
-                    return true;
+                    return GameResultEnum.Player1Won;
+                }
+                if (player2.h == gameStateRows || player2.v == gameStateColumns)
+                {
+                    return GameResultEnum.Player2Won;
                 }
 
-                if (gameState[i, i] == player)
+                switch (gameState[i, i])
                 {
-                    rightSlope++;
+                    case FieldStateEnum.OccupiedByPlayer1:
+                        player1.diag++;
+                        break;
+                    case FieldStateEnum.OccupiedByPlayer2:
+                        player2.diag++;
+                        break;
                 }
-                if (gameState[gameState.GetLength(0) - i, i] == player)
+                switch (gameState[gameStateRows - i, i])
                 {
-                    leftSlope++;
+                    case FieldStateEnum.OccupiedByPlayer1:
+                        player1.antidiag++;
+                        break;
+                    case FieldStateEnum.OccupiedByPlayer2:
+                        player2.antidiag++;
+                        break;
                 }
             }
-            if (rightSlope == gameState.GetLength(0) || leftSlope == gameState.GetLength(0))
+
+            if (player1.diag == gameStateRows || player1.antidiag == gameStateRows)
             {
-                return true;
+                return GameResultEnum.Player1Won;
             }
-            return false;
+            if (player2.diag == gameStateRows || player2.antidiag == gameStateRows)
+            {
+                return GameResultEnum.Player2Won;
+            }
+
+            return anyFieldIsEmpty ? GameResultEnum.GameOngoing : GameResultEnum.Draw;
         }
-        bool HasEmptyFields(FieldStateEnum[,] gameState)
-        {
-            for (var i = 0; i < gameState.GetLength(0); i++)
-            {
-                for (var j = 0; j < gameState.GetLength(1); j++)
-                {
-                    if (gameState[i, j] == FieldStateEnum.Empty)
-                    {
-                        return false;
-                    }
-                }
-            }
 
-            return true;
-        }
         public override bool IsTerminal(FieldStateEnum[,] gameState)
         {
-            //any of players has won
-            if (HasWon(FieldStateEnum.OccupiedByPlayer1, gameState) || HasWon(FieldStateEnum.OccupiedByPlayer2, gameState))
-                return true;
-
-            //no move available
-            return HasEmptyFields(gameState) == false;
+            return GetGameResult(gameState) != GameResultEnum.GameOngoing;
         }
     }
 }
