@@ -1,0 +1,11 @@
+﻿.tictactoe-container {
+    border-radius: 10vh;
+    box-shadow: 0px 3px 10px #00000029;
+    height: 100%;
+}
+.tictactoe-border-bottom{
+    border-bottom: 5px solid black;
+}
+.tictactoe-border-left {
+    border-left: 5px solid black;
+}

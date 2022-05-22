@@ -58,8 +58,8 @@ namespace SZIGRA.Algorithm
             }
 
         }
-        public abstract bool IsTerminal(T gameState);
-        public abstract double Evaluate(T gameState, bool maximizingPlayer);
-        public abstract IEnumerable<T> GetAvailableStates(T gameState, bool maximizingPlayer);
+        protected abstract bool IsTerminal(T gameState);
+        protected abstract double Evaluate(T gameState, bool maximizingPlayer);
+        protected abstract IEnumerable<T> GetAvailableStates(T gameState, bool maximizingPlayer);
     }
 }

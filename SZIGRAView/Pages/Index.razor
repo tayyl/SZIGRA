@@ -1,0 +1,22 @@
+﻿@page "/"
+@using SZIGRAView.Board
+
+<div>
+    <div class="tictactoe-game">
+        <!--tu by sie przydalo GetGameResult do IsFinalMove i do IsDraw, a do GetWinnerCoords zwrocenie sekwencji ktora wygrala, zeby plansza mogla ja zaznaczyc -->
+        <TicTacToeBoard Width=3 Height=3 OnFieldClicked='OnFieldClicked' IsFinalMove="()=>false" GetWinnerCoords="()=>default" IsDraw="()=>false"/>
+    </div>
+</div>
+
+@code{
+    //?? jak dobrze oddzielic widok od logiki - plansza nie powinna znac zasad
+    bool isX;
+    void OnFieldClicked(int x, int y, ref string fieldContent)
+    {
+        //TODO: wykonanie ruchu - podpiac logike z biblioteki SZIGRA
+        Console.WriteLine($"Clicked {x},{y}");
+        fieldContent = isX ? "X" : "O";
+        isX = !isX;
+    }
+    //todo: ustawienia - pvp, pvc, ?cvc?, restart
+}

@@ -1,0 +1,22 @@
+﻿<div class="row justify-content-center h-100">
+    <div class="tictactoe-container">
+        @{
+            for (var i = 0; i < this.Height; i++)
+            {
+                <div class="row justify-content-center" style=" height: @rowHeight()">
+                    @{
+                        for (var j = 0; j < this.Width; j++)
+                        {
+                            var divX = i;
+                            var divY = j;
+                            <div class="col-3 text-md-center @borderClass(i,j)" >
+                            <BoardField X=divX Y=divY OnButtonClicked="FieldClicked"/>
+                            </div>
+                        }
+                    }
+                </div>
+            }
+        }
+
+    </div>
+</div>

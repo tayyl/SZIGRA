@@ -9,12 +9,12 @@ using SZIGRA.Enums;
 
 namespace SZIGRA.Algorithm
 {
-    public class TicTacToeMiniMax : MiniMaxBase<FieldStateEnum[,]>
+    public class TicTacToeMiniMax : MiniMaxBase<PlayerEnum[,]>
     {
         public TicTacToeMiniMax(double alpha, double beta, int maxDepth) : base(alpha, beta, maxDepth)
         {
         }
-        public override double Evaluate(FieldStateEnum[,] gameState, bool maximizingPlayer)
+        protected override double Evaluate(PlayerEnum[,] gameState, bool maximizingPlayer)
         {
             var gameResult = GetGameResult(gameState);
 
@@ -34,26 +34,26 @@ namespace SZIGRA.Algorithm
             return 0;
         }
 
-        public override IEnumerable<FieldStateEnum[,]> GetAvailableStates(FieldStateEnum[,] gameState, bool maximizingPlayer)
+        protected override IEnumerable<PlayerEnum[,]> GetAvailableStates(PlayerEnum[,] gameState, bool maximizingPlayer)
         {
-            var playerToMove = maximizingPlayer ? FieldStateEnum.OccupiedByPlayer2 : FieldStateEnum.OccupiedByPlayer1;
+            var playerToMove = maximizingPlayer ? PlayerEnum.Player2 : PlayerEnum.Player1;
 
             for (var i = 0; i < gameState.GetLength(0); i++)
             {
                 for (var j = 0; j < gameState.GetLength(1); j++)
                 {
 
-                    if (gameState[i, j] == FieldStateEnum.Empty)
+                    if (gameState[i, j] == PlayerEnum.None)
                     {
-                        var gameStateCopy = (FieldStateEnum[,])gameState.Clone();
+                        var gameStateCopy = (PlayerEnum[,])gameState.Clone();
                         gameStateCopy[i, j] = playerToMove;
                         yield return gameStateCopy;
                     }
                 }
             }
         }
-
-        GameResultEnum GetGameResult(FieldStateEnum[,] gameState)
+        //?? wyjąć to gdzieś wyżej?
+        public GameResultEnum GetGameResult(PlayerEnum[,] gameState)
         {
             var anyFieldIsEmpty = false;
             (int h, int v, int diag, int antidiag) player1 = (0, 0, 0, 0);
@@ -68,25 +68,25 @@ namespace SZIGRA.Algorithm
                 {
                     switch (gameState[i, j])
                     {
-                        case FieldStateEnum.Empty:
+                        case PlayerEnum.None:
                             anyFieldIsEmpty = true;
                             break;
-                        case FieldStateEnum.OccupiedByPlayer1:
+                        case PlayerEnum.Player1:
                             player1.h++;
                             break;
-                        case FieldStateEnum.OccupiedByPlayer2:
+                        case PlayerEnum.Player2:
                             player2.h++;
                             break;
                     }
                     switch (gameState[j, i])
                     {
-                        case FieldStateEnum.Empty:
+                        case PlayerEnum.None:
                             anyFieldIsEmpty = true;
                             break;
-                        case FieldStateEnum.OccupiedByPlayer1:
+                        case PlayerEnum.Player1:
                             player1.v++;
                             break;
-                        case FieldStateEnum.OccupiedByPlayer2:
+                        case PlayerEnum.Player2:
                             player2.v++;
                             break;
                     }
@@ -103,19 +103,19 @@ namespace SZIGRA.Algorithm
 
                 switch (gameState[i, i])
                 {
-                    case FieldStateEnum.OccupiedByPlayer1:
+                    case PlayerEnum.Player1:
                         player1.diag++;
                         break;
-                    case FieldStateEnum.OccupiedByPlayer2:
+                    case PlayerEnum.Player2:
                         player2.diag++;
                         break;
                 }
                 switch (gameState[gameStateRows - i, i])
                 {
-                    case FieldStateEnum.OccupiedByPlayer1:
+                    case PlayerEnum.Player1:
                         player1.antidiag++;
                         break;
-                    case FieldStateEnum.OccupiedByPlayer2:
+                    case PlayerEnum.Player2:
                         player2.antidiag++;
                         break;
                 }
@@ -133,7 +133,7 @@ namespace SZIGRA.Algorithm
             return anyFieldIsEmpty ? GameResultEnum.GameOngoing : GameResultEnum.Draw;
         }
 
-        public override bool IsTerminal(FieldStateEnum[,] gameState)
+        protected override bool IsTerminal(PlayerEnum[,] gameState)
         {
             return GetGameResult(gameState) != GameResultEnum.GameOngoing;
         }
