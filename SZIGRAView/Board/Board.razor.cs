@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 
 namespace SZIGRAView.Board;
-public partial class TicTacToeBoard
+public partial class Board
 {
     [Parameter]
     public int Width { get; set; }

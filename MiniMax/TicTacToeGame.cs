@@ -16,6 +16,7 @@ namespace SZIGRA
         IPlayer player2;
         //na pewno stan gry powinien byc tworzony poza gra?
         //teraz musi, bo gracze maja miec dependency do planszy, wiec zeby wszystko trzymalo ta sama referencje
+        //zaleznie od preferencji mozna podac dwoch graczy komputerowych lub ludzkich
         public TicTacToeGame(IPlayer player1, IPlayer player2, PlayerEnum[,] gameState)
         {
             this.GameState = gameState;
