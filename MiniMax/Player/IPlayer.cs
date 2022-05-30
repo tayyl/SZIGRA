@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace SZIGRA.Player
 {
-    public interface IPlayer
+    public interface IPlayer<T>
     {
-        public bool MakeMove(int x, int y);
+        public T MakeMove(T gameState);
     }
 }

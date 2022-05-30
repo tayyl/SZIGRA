@@ -9,25 +9,14 @@ namespace SZIGRA.Player
 {
     public class TicTacToePlayer : PlayerBase
     {
-        public TicTacToePlayer(PlayerEnum[,] gameState, PlayerEnum playerRole) : base(gameState, playerRole)
+        public TicTacToePlayer(PlayerEnum playerRole) : base(playerRole)
         {
         }
 
-        public override bool MakeMove(int x, int y)
+        public override TicTacToeGameState MakeMove(TicTacToeGameState gameState)
         {
-            try
-            {
-                if (gameState[x, y] != PlayerEnum.None)
-                {
-                    return false;
-                }
-                gameState[x, y] = playerMark; //?? czy gracz powinien zmieniac stan gry?
-                return true;
-            }
-            catch (Exception e)
-            {
-                return false;
-            }
+            //?? jak czekac na klikniecie?
+            return gameState;
         }
     }
 }

@@ -9,6 +9,7 @@
     <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
     <link href="css/app.css" rel="stylesheet" />
     <link href="SZIGRAView.styles.css" rel="stylesheet" />
+    <script src="_content/Blazor.Extensions.Canvas/blazor.extensions.canvas.js"></script>
 </head>
 
 <body>
@@ -26,6 +27,44 @@
         <a class="dismiss">🗙</a>
     </div>
     <script src="_framework/blazor.webassembly.js"></script>
+    <script>
+        function addElementStyle(elementId,style) {
+            const s = document.getElementById(elementId);
+            s.style.cssText += style;
+        }
+        function startDrawing(timeStamp) {
+            if (!window.isDrawing) {
+
+                window.requestAnimationFrame(startDrawing);
+            }
+            game.instance.invokeMethodAsync('DrawWinnerLine');
+        }
+        function onResize() {
+            if (!window.game.canvas)
+                return;
+            var tictactoeContainer = document.getElementById('tictactoe-container');
+            console.log(tictactoeContainer.offsetWidth)
+            game.canvas.width = tictactoeContainer.offsetWidth;
+            game.canvas.height = tictactoeContainer.offsetHeight;
+        }
+        window.initDrawing = (instance) => {
+            var canvasContainer = document.getElementById('canvasContainer'),
+                canvases = canvasContainer.getElementsByTagName('canvas') || [];
+            window.game = {
+                instance: instance,
+                canvas: canvases.length ? canvases[0] : null
+            };
+            window.isDrawing = false;
+            window.finishDrawing = () => {
+                isDrawing = true;
+            }
+
+            //window.addEventListener("resize", onResize);
+            //onResize();
+
+            window.requestAnimationFrame(startDrawing);
+        };
+    </script>
 </body>
 
 </html>

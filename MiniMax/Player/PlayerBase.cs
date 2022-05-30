@@ -7,15 +7,13 @@ using System.Threading.Tasks;
 
 namespace SZIGRA.Player
 {
-    public abstract class PlayerBase : IPlayer
+    public abstract class PlayerBase : IPlayer<TicTacToeGameState>
     {
-        protected PlayerEnum[,] gameState;
         protected PlayerEnum playerMark;
-        public PlayerBase(PlayerEnum[,] gameState, PlayerEnum playerRole)
+        public PlayerBase(PlayerEnum playerRole)
         {
             this.playerMark = playerRole;
-            this.gameState = gameState;
         }
-        public abstract bool MakeMove(int x, int y);
+        public abstract TicTacToeGameState MakeMove(TicTacToeGameState gameState);
     }
 }

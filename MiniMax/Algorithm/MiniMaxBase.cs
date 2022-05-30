@@ -33,8 +33,9 @@ namespace SZIGRA.Algorithm
 
                 foreach (var nextState in GetAvailableStates(gameState, maximizingPlayer))
                 {
+                    //?? - zwraca najglebszy, cos nie tak
                     var newState = AlphaBetaPruning(nextState, false, depth - 1, alpha, beta);
-                    value = newState.score >= value.score ? newState : newState;
+                    value = newState.score >= value.score ? (nextState,newState.score) : value;
 
                     if (value.score >= beta) break;
                     alpha = alpha >= value.score ? alpha : value.score;
@@ -49,7 +50,7 @@ namespace SZIGRA.Algorithm
                 foreach (var nextState in GetAvailableStates(gameState, maximizingPlayer))
                 {
                     var newState = AlphaBetaPruning(nextState, true, depth - 1, alpha, beta);
-                    value = newState.score <= value.score ? newState : value;
+                    value = newState.score <= value.score ? (nextState,newState.score) : value;
 
                     if (value.score <= alpha) break;
                     beta = beta <= value.score ? beta : value.score;

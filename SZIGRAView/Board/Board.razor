@@ -1,22 +1,30 @@
-﻿<div class="row justify-content-center h-100">
-    <div class="tictactoe-container">
+﻿@inject IJSRuntime JsRuntime;
+<div class="row justify-content-center h-100">
+
+    <div class="tictactoe-container" id="tictactoe-container">
+@*        @{
+
+            <div style="position:absolute;z-index:@zindex" id="canvasContainer">
+                <BECanvas Width="600" Height="600" @ref="_canvasReference"></BECanvas>
+            </div>
+        }*@
         @{
             for (var i = 0; i < this.Height; i++)
             {
-                <div class="row justify-content-center" style=" height: @rowHeight()">
-                    @{
+                    <div class="row justify-content-center" style=" height: @RowHeight()">
+                        @{
                         for (var j = 0; j < this.Width; j++)
                         {
                             var divX = i;
                             var divY = j;
-                            <div class="col-3 text-md-center @borderClass(i,j)" >
-                            <BoardField X=divX Y=divY OnButtonClicked="FieldClicked"/>
-                            </div>
+                            var id = $"{i}-{j}";
+                                    <div class="text-md-center @BorderClass(i,j)" style="width: @RowWidth();" id="@id">
+                                        <BoardField X=divX Y=divY OnButtonClicked="FieldClicked" FontSize="@CalculateFontSize()" GameState="GameState" />
+                                    </div>
                         }
-                    }
-                </div>
+                        }
+                    </div>
             }
         }
-
     </div>
 </div>
