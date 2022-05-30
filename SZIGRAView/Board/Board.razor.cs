@@ -22,7 +22,7 @@ public partial class Board
     public Func<(int x, int y)[]> GetWinnerCoords { get; set; }
     [Parameter]
     public string[,] GameState { get; set; }
-
+    string Winner { get; set; }
     async Task Finish()
     {
         var points = GetWinnerCoords();
@@ -33,7 +33,22 @@ public partial class Board
                 "background-color: #6CD94E; transition: all 0.5s ease; "
                 );
         }
-     
+        await Task.Delay(2000);
+        await JsRuntime.InvokeAsync<object>(
+                "addElementStyle", $"tictactoe-blur",
+                "filter: blur(8px); transition: all 2s ease; "
+                );
+        Winner = "<span style=\"color: rgb(242,130,22)\">O</span>";
+        StateHasChanged();
+        await JsRuntime.InvokeAsync<object>(
+                "addElementStyle", $"tictactoe-result",
+                "z-index: 5"
+                );
+        await JsRuntime.InvokeAsync<object>(
+                "addElementClass", $"tictactoe-result",
+                "visible"
+                );
+
     }
 
     string BorderClass(int i, int j)

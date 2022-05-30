@@ -1,24 +1,29 @@
 ﻿@inject IJSRuntime JsRuntime;
 <div class="row justify-content-center h-100">
-
     <div class="tictactoe-container" id="tictactoe-container">
-        @{
-            for (var i = 0; i < this.Height; i++)
-            {
+        <div class="tictactoe-result" id="tictactoe-result">
+            @((MarkupString)Winner) wins!
+        </div>
+        <span id="tictactoe-blur">
+            @{
+                for (var i = 0; i < this.Height; i++)
+                {
                     <div class="row justify-content-center" style=" height: @RowHeight()">
                         @{
-                        for (var j = 0; j < this.Width; j++)
-                        {
-                            var divX = i;
-                            var divY = j;
-                            var id = $"{i}-{j}";
-                                    <div class="text-md-center @BorderClass(i,j)" style="width: @RowWidth();" id="@id">
-                                        <BoardField X=divX Y=divY OnButtonClicked="FieldClicked" FontSize="@CalculateFontSize()" GameState="GameState" />
-                                    </div>
-                        }
+                            for (var j = 0; j < this.Width; j++)
+                            {
+                                var divX = i;
+                                var divY = j;
+                                var id = $"{i}-{j}";
+                                <div class="text-md-center @BorderClass(i,j)" style="width: @RowWidth();" id="@id">
+                                    <BoardField X=divX Y=divY OnButtonClicked="FieldClicked" FontSize="@CalculateFontSize()" GameState="GameState" />
+                                </div>
+                            }
                         }
                     </div>
+                }
             }
-        }
+        </span>
+
     </div>
 </div>
