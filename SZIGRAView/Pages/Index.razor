@@ -8,6 +8,7 @@
 
 <div>
     <div class="tictactoe-game">
+        <Header />
         <Board Width=3
                Height=3
                GameState="GameStateToDraw"
@@ -57,12 +58,14 @@
     }
     void ChangeGameStateToDraw()
     {
+        const string player1Style = "<span style=\"color: rgb(242,130,22)\">O</span>";
+        const string player2Style = "<span style=\"color: rgb(0,134,229)\">X</span>";
         for (var i = 0; i < GameStateToDraw.GetLength(0); i++)
         {
             for (var j = 0; j < GameStateToDraw.GetLength(1); j++)
             {
                 if (ticTacToeGameState[i, j] == PlayerEnum.None) continue;
-                GameStateToDraw[i, j] = ticTacToeGameState[i, j] == PlayerEnum.Player1 ? "<span style=\"color: blue\">X</span>" : "<span style=\"color: orange\">O</span>";
+                GameStateToDraw[i, j] = /*ticTacToeGameState[i, j] == PlayerEnum.Player1*/ isPlayer1Move ? player1Style : player2Style;
             }
         }
     }
