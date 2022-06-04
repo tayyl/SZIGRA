@@ -50,7 +50,7 @@
     Task OnFieldClicked(int x, int y)
     {
         var newState = isPlayer1Move ? player1.MakeMove(ticTacToeGameState, x, y) : player2.MakeMove(ticTacToeGameState, x, y);
-        if (newState.Equals(ticTacToeGameState) == false)
+        if (newState?.Equals(ticTacToeGameState) == false)
         {
             isPlayer1Move = !isPlayer1Move;
             ticTacToeGameState = newState;
