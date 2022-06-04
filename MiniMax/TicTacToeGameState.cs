@@ -11,6 +11,32 @@ namespace SZIGRA
     public class TicTacToeGameState
     {
         PlayerEnum[,] gameState;
+        public List<List<(int x, int y)>> GenerateWinningSequences()
+        {
+            var res = new List<List<(int x, int y)>>();
+
+            var toAddDiag = new List<(int x, int y)>();
+            var toAddAntiDiag = new List<(int x, int y)>();
+            for (var i = 0; i < gameState.GetLength(0); i++)
+            {
+                var toAddH = new List<(int x, int y)>();
+                var toAddV = new List<(int x, int y)>();
+                for (var j = 0; j < gameState.GetLength(1); j++)
+                {
+                    toAddH.Add((i, j));
+                    toAddV.Add((j, i));
+                }
+                res.Add(toAddH);
+                res.Add(toAddV);
+                toAddDiag.Add((i, i));
+                toAddAntiDiag.Add((gameState.GetLength(0) - i - 1, i));
+            }
+
+            res.Add(toAddDiag);
+            res.Add(toAddAntiDiag);
+
+            return res;
+        }
         public TicTacToeGameState(int width, int height)
         {
             gameState = new PlayerEnum[width, height];
@@ -19,7 +45,12 @@ namespace SZIGRA
         {
             this.gameState = gameState;
         }
+        public TicTacToeGameState Clone()
+        {
+            var newGameState = (PlayerEnum[,])gameState.Clone();
 
+            return new TicTacToeGameState(newGameState);
+        }
         public IEnumerable<TicTacToeGameState> GetAvailableStates(PlayerEnum player)
         {
 
@@ -137,5 +168,6 @@ namespace SZIGRA
             get => gameState[x, y];
             set => gameState[x, y] = value;
         }
+        
     }
 }

@@ -11,22 +11,36 @@ namespace SZIGRA.Algorithm
 {
     public class TicTacToeMiniMax : MiniMaxBase<TicTacToeGameState>
     {
-        public TicTacToeMiniMax(double alpha, double beta, int maxDepth) : base(alpha, beta, maxDepth)
+        GameResultEnum winningResult;
+        GameResultEnum losingResult;
+        PlayerEnum playerToWin;
+        PlayerEnum playerToLose;
+        public TicTacToeMiniMax(
+            GameResultEnum winningResult, 
+            GameResultEnum losingResult, 
+            PlayerEnum maximizingPlayer, 
+            PlayerEnum minimizingPlayer, 
+            double alpha, 
+            double beta, 
+            int maxDepth
+        ) : base(alpha, beta, maxDepth)
         {
+            this.winningResult = winningResult;
+            this.losingResult = losingResult;
+            this.playerToLose = minimizingPlayer;
+            this.playerToWin = maximizingPlayer;
         }
-        protected override double Evaluate(TicTacToeGameState gameState, bool maximizingPlayer)
+        protected override double Evaluate(TicTacToeGameState gameState)
         {
             var gameResult = gameState.GetGameResult();
 
-            var playerResult = maximizingPlayer ? GameResultEnum.Player1Won : GameResultEnum.Player2Won;
-            var opponentResult = maximizingPlayer ? GameResultEnum.Player2Won : GameResultEnum.Player1Won;
-
-            if (gameResult.gameResult == playerResult)
+         
+            if (gameResult.gameResult == winningResult)
             {
                 return 1;
             }
 
-            if (gameResult.gameResult == opponentResult)
+            if (gameResult.gameResult == losingResult)
             {
                 return -1;
             }
@@ -36,11 +50,11 @@ namespace SZIGRA.Algorithm
 
         protected override IEnumerable<TicTacToeGameState> GetAvailableStates(TicTacToeGameState gameState, bool maximizingPlayer)
         {
-            var playerToMove = maximizingPlayer ? PlayerEnum.Player2 : PlayerEnum.Player1;
+            var playerToMove = maximizingPlayer ? playerToWin : playerToLose;
 
             return gameState.GetAvailableStates(playerToMove);
         }
- 
+
         protected override bool IsTerminal(TicTacToeGameState gameState)
         {
             return gameState.GetGameResult().gameResult != GameResultEnum.GameOngoing;

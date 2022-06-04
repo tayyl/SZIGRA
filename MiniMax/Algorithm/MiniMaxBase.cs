@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using SZIGRA.Algorithm;
 
 namespace SZIGRA.Algorithm
@@ -22,45 +23,42 @@ namespace SZIGRA.Algorithm
         {
             return AlphaBetaPruning(gameState, true, MaxDepth, Alpha, Beta).gameState;
         }
+
         private (T gameState, double score) AlphaBetaPruning(T gameState, bool maximizingPlayer, int depth, double alpha, double beta)
         {
             if (depth == 0 || IsTerminal(gameState))
-                return (gameState, Evaluate(gameState,maximizingPlayer));
+                return (default(T), Evaluate(gameState));
 
             if (maximizingPlayer)
             {
-                var value = (state: default(T), score: double.NegativeInfinity);
+                var stateToReturn = default(T);
 
                 foreach (var nextState in GetAvailableStates(gameState, maximizingPlayer))
                 {
-                    //?? - zwraca najglebszy, cos nie tak
-                    var newState = AlphaBetaPruning(nextState, false, depth - 1, alpha, beta);
-                    value = newState.score >= value.score ? (nextState,newState.score) : value;
-
-                    if (value.score >= beta) break;
-                    alpha = alpha >= value.score ? alpha : value.score;
+                    var newScore = AlphaBetaPruning(nextState, false, depth - 1, alpha, beta).score;
+                    stateToReturn = alpha < newScore ? nextState : stateToReturn;
+                    alpha = alpha < newScore ? newScore : alpha;
+                    if (alpha >= beta) break;
                 }
 
-                return value;
+                return (stateToReturn, alpha);
             }
             else
             {
-                var value = (state: default(T), score: double.PositiveInfinity);
+                var stateToReturn = default(T);
 
                 foreach (var nextState in GetAvailableStates(gameState, maximizingPlayer))
                 {
-                    var newState = AlphaBetaPruning(nextState, true, depth - 1, alpha, beta);
-                    value = newState.score <= value.score ? (nextState,newState.score) : value;
-
-                    if (value.score <= alpha) break;
-                    beta = beta <= value.score ? beta : value.score;
+                    var newScore = AlphaBetaPruning(nextState, true, depth - 1, alpha, beta).score;
+                    stateToReturn = beta > newScore ? nextState : stateToReturn;
+                    beta = beta > newScore ? newScore : beta;
+                    if (alpha >= beta) break;
                 }
-                return value;
+                return (stateToReturn, beta);
             }
-
         }
         protected abstract bool IsTerminal(T gameState);
-        protected abstract double Evaluate(T gameState, bool maximizingPlayer);
+        protected abstract double Evaluate(T gameState);
         protected abstract IEnumerable<T> GetAvailableStates(T gameState, bool maximizingPlayer);
     }
 }

@@ -2,7 +2,7 @@
 <div class="row justify-content-center h-100">
     <div class="tictactoe-container" id="tictactoe-container">
         <div class="tictactoe-result" id="tictactoe-result">
-            @((MarkupString)Winner) wins!
+            @((MarkupString)Winner)
         </div>
         <span id="tictactoe-blur">
             @{
@@ -15,8 +15,8 @@
                                 var divX = i;
                                 var divY = j;
                                 var id = $"{i}-{j}";
-                                <div class="text-md-center @BorderClass(i,j)" style="width: @RowWidth();" id="@id">
-                                    <BoardField X=divX Y=divY OnButtonClicked="FieldClicked" FontSize="@CalculateFontSize()" GameState="GameState" />
+                                <div class="text-md-center @BorderClass(i,j) tictactoe-cell" style="width: @RowWidth();" id="@id">
+                                    <BoardField X=divX Y=divY OnButtonClicked="FieldClicked" GameState="GameState" />
                                 </div>
                             }
                         }

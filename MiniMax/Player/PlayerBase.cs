@@ -14,6 +14,6 @@ namespace SZIGRA.Player
         {
             this.playerMark = playerRole;
         }
-        public abstract TicTacToeGameState MakeMove(TicTacToeGameState gameState);
+        public abstract TicTacToeGameState MakeMove(TicTacToeGameState gameState, int x, int y);
     }
 }

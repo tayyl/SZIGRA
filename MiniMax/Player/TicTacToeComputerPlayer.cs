@@ -18,7 +18,7 @@ namespace SZIGRA.Player
             this.algorithm = algorithm;
         }
 
-        public override TicTacToeGameState MakeMove(TicTacToeGameState gameState)
+        public override TicTacToeGameState MakeMove(TicTacToeGameState gameState, int x, int y)
         {
             return algorithm.FindBestMove(gameState);
         }

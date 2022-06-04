@@ -13,9 +13,14 @@ namespace SZIGRA.Player
         {
         }
 
-        public override TicTacToeGameState MakeMove(TicTacToeGameState gameState)
+        public override TicTacToeGameState MakeMove(TicTacToeGameState gameState, int x, int y)
         {
-            //?? jak czekac na klikniecie?
+            if (gameState[x,y] == PlayerEnum.None)
+            {
+                var newState = gameState.Clone();
+                newState[x, y] = playerMark;
+                return newState;
+            }
             return gameState;
         }
     }

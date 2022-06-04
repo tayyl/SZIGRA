@@ -8,6 +8,6 @@ namespace SZIGRA.Player
 {
     public interface IPlayer<T>
     {
-        public T MakeMove(T gameState);
+        public T MakeMove(T gameState, int x, int y);
     }
 }

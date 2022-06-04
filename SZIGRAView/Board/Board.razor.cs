@@ -13,7 +13,7 @@ public partial class Board
     [Parameter]
     public int Height { get; set; }
     [Parameter]
-    public OnFieldClicked OnFieldClicked { get; set; }
+    public Func<int,int,Task> OnFieldClicked { get; set; }
     [Parameter]
     public Func<bool> IsFinalMove { get; set; }
     [Parameter]
@@ -33,13 +33,20 @@ public partial class Board
                 "background-color: #6CD94E; transition: all 0.5s ease; "
                 );
         }
+        var anyWinPos = GetWinnerCoords()[0];
+
+        Winner = GameState[anyWinPos.x,anyWinPos.y]+ " wins!";
+        StateHasChanged();
+        await ShowResult();
+    }
+    async Task ShowResult()
+    {
         await Task.Delay(2000);
         await JsRuntime.InvokeAsync<object>(
                 "addElementStyle", $"tictactoe-blur",
                 "filter: blur(8px); transition: all 2s ease; "
                 );
-        Winner = "<span style=\"color: rgb(242,130,22)\">O</span>";
-        StateHasChanged();
+
         await JsRuntime.InvokeAsync<object>(
                 "addElementStyle", $"tictactoe-result",
                 "z-index: 5"
@@ -50,7 +57,6 @@ public partial class Board
                 );
 
     }
-
     string BorderClass(int i, int j)
     {
         var borderClassName = "tictactoe-border-";
@@ -68,11 +74,6 @@ public partial class Board
     {
         return $"{(100 / Width)}%";
     }
-    string CalculateFontSize()
-    {
-        var fontSize = 12;
-        return $"{fontSize}vh";
-    }
     async Task Draw()
     {
         for(var i = 0; i < Height; i++)
@@ -86,10 +87,15 @@ public partial class Board
 
             }
         }
+        Winner = "Draw!";
+        StateHasChanged();
+        await ShowResult();
 
     }
     async Task FieldClicked(int x, int y)
     {
+        await OnFieldClicked(x, y);
+        StateHasChanged();
         if (IsFinalMove())
         {
             if (IsDraw())
@@ -101,11 +107,6 @@ public partial class Board
                 await Finish();
             }
 
-        }
-        else
-        {
-            await OnFieldClicked(x, y);
-            StateHasChanged();
         }
     }
 }
