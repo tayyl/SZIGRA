@@ -95,6 +95,10 @@ public partial class Board
     async Task FieldClicked(int x, int y)
     {
         await OnFieldClicked(x, y);
+        await GameStateChanged();
+    }
+    public async Task GameStateChanged()
+    {
         StateHasChanged();
         if (IsFinalMove())
         {

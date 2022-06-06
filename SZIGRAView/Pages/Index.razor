@@ -9,9 +9,42 @@
 <div>
     <div class="tictactoe-game">
         <Header />
+        <div style="margin-bottom: 2vh">
+
+            <MudSelect @bind-Value="pickedGameMode" Label="Select game-mode" AdornmentIcon="@Icons.Material.Filled.PlayCircle" AnchorOrigin="Origin.BottomCenter" AdornmentColor="Color.Secondary" Style="margin-bottom:1vh; width: 50px">
+                <MudSelectItem Value="@(GameMode.PlayerVsComputer)"> Player vs Computer</MudSelectItem>
+                <MudSelectItem Value="@(GameMode.PlayerVsPlayer)">Player vs Player</MudSelectItem>
+                <MudSelectItem Value="@(GameMode.ComputerVsComputer)">Computer vs Computer</MudSelectItem>
+            </MudSelect>
+            <MudNumericField @bind-Value="BoardSize" Label="Board size" Variant="Variant.Text" Min="3" Max="5" Style="margin-bottom:1vh" />
+            <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="OnStartButtonClicked">@StartButtonText</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Info" OnClick="ComputerMove" StartIcon="@Icons.Material.Filled.Android" Disabled="@(isComputerMoving || isPlayer1Move == false)">
+                @if (isComputerMoving && isPlayer1Move)
+                {
+                    <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                    <MudText Class="ms-2">Moving..</MudText>
+                }
+                else
+                {
+                    <MudText>MOVE</MudText>
+                }
+            </MudButton>
+            @if (StartButtonText == "RESTART")
+            {
+                    @if (isPlayer1Move)
+                    {
+                        <span style="color: rgb(242,130,22); font-size: 3vh;">O</span>
+                    }
+                    else
+                    {
+                        <span style="color: rgb(0,134,229);font-size: 3vh;">X</span>
+                    }
+                    <span>is moving</span>
+            }
+        </div>
         <Board @ref="board"
-               Width=3
-               Height=3
+               Width=@BoardSize
+               Height=@BoardSize
                GameState="GameStateToDraw"
                OnFieldClicked='OnFieldClicked'
                IsFinalMove="()=> gameResult != GameResultEnum.GameOngoing"
@@ -21,6 +54,66 @@
 </div>
 
 @code {
+    #region View
+    int BoardSize = 3;
+    GameMode pickedGameMode = GameMode.PlayerVsComputer;
+    string StartButtonText = "START";
+    bool isComputerMoving;
+    async Task ComputerMove()
+    {
+        isComputerMoving = true;
+        await Task.Yield();
+        var newState = await Task.Run(
+            () =>
+            {
+
+                StateHasChanged();
+                return player1.MakeMove(ticTacToeGameState, 0, 0);
+            }
+        );
+        MakeMove(newState);
+        StateHasChanged();
+        await board.GameStateChanged();
+        isComputerMoving = false;
+    }
+    async Task OnStartButtonClicked()
+    {
+        StartButtonText = "RESTART";
+
+        InitGame();
+
+        StateHasChanged();
+        await board.GameStateChanged();
+    }
+    void InitGame()
+    {
+        OnFieldClicked = PVC;
+        ticTacToeGameState = new TicTacToeGameState(BoardSize, BoardSize);
+        GameStateToDraw = new string[BoardSize, BoardSize];
+        player1 = new TicTacToeComputerPlayer(
+            new TicTacToeMiniMax(
+                GameResultEnum.Player1Won,
+                GameResultEnum.Player2Won,
+                PlayerEnum.Player1,
+                PlayerEnum.Player2,
+                double.NegativeInfinity,
+                double.PositiveInfinity,
+                8
+            ),
+            PlayerEnum.Player1
+        );
+        player2 = new TicTacToePlayer(PlayerEnum.Player2);
+    }
+    #endregion
+    #region Game
+    enum GameMode
+    {
+        PlayerVsPlayer = 0,
+        PlayerVsComputer = 1,
+        ComputerVsComputer = 2
+    }
+
+    Func<int, int, Task> OnFieldClicked;
     Board? board;
     bool isPlayer1Move = false;
     TicTacToeGameState ticTacToeGameState;
@@ -29,27 +122,41 @@
     string[,] GameStateToDraw;
     GameResultEnum gameResult = GameResultEnum.GameOngoing;
     (int x, int y)[] winningCords;
+
     public Index()
     {
-        ticTacToeGameState = new TicTacToeGameState(3, 3);
-        GameStateToDraw = new string[3, 3];
+        ticTacToeGameState = new TicTacToeGameState(BoardSize, BoardSize);
+        GameStateToDraw = new string[BoardSize, BoardSize];
         player1 = new TicTacToeComputerPlayer(
             new TicTacToeMiniMax(
-                GameResultEnum.Player1Won, 
-                GameResultEnum.Player2Won, 
+                GameResultEnum.Player1Won,
+                GameResultEnum.Player2Won,
                 PlayerEnum.Player1,
                 PlayerEnum.Player2,
-                double.NegativeInfinity, 
-                double.PositiveInfinity, 
+                double.NegativeInfinity,
+                double.PositiveInfinity,
                 8
             ),
             PlayerEnum.Player1
         );
         player2 = new TicTacToePlayer(PlayerEnum.Player2);
+        OnFieldClicked = (x, y) => { return Task.CompletedTask; };
+
+
     }
-    Task OnFieldClicked(int x, int y)
+    Task PVC(int x, int y)
     {
-        var newState = isPlayer1Move ? player1.MakeMove(ticTacToeGameState, x, y) : player2.MakeMove(ticTacToeGameState, x, y);
+        if (!isPlayer1Move)
+        {
+            var newState = player2.MakeMove(ticTacToeGameState, x, y);
+            MakeMove(newState);
+            StateHasChanged();
+        }
+        return Task.CompletedTask;
+
+    }
+    void MakeMove(TicTacToeGameState newState)
+    {
         if (newState?.Equals(ticTacToeGameState) == false)
         {
             isPlayer1Move = !isPlayer1Move;
@@ -64,13 +171,23 @@
             {
                 winningCords = result.sequenceCoords;
             }
+
         }
-        return Task.CompletedTask;
     }
+
+    //Task PVP()
+    //{
+
+    //}
+    //Task CVC()
+    //{
+
+    //}
     void ChangeGameStateToDraw()
     {
-        const string player1Style = "<span style=\"color: rgb(242,130,22); font-size: 12vh;\">O</span>";
-        const string player2Style = "<span style=\"color: rgb(0,134,229);font-size: 12vh;\">X</span>";
+        var fontSize = (12 * 10) / (BoardSize * BoardSize);
+        string player1Style = $"<span style=\"color: rgb(242,130,22); font-size: {fontSize}vh;\">O</span>";
+        string player2Style = $"<span style=\"color: rgb(0,134,229);font-size: {fontSize}vh;\">X</span>";
         for (var i = 0; i < GameStateToDraw.GetLength(0); i++)
         {
             for (var j = 0; j < GameStateToDraw.GetLength(1); j++)
@@ -80,5 +197,6 @@
             }
         }
     }
+    #endregion
     //todo: ustawienia - pvp, pvc, ?cvc?, restart, move computer
 }
