@@ -1,0 +1,11 @@
+﻿h3 {
+    margin-top: 2vh;
+    text-align: center;
+    margin-bottom: 3vh;
+    font-family: 'Bauhaus 93';
+    font-size: 5vh;
+    color: rgb(242,130,22);
+    background-color: rgb(0,134,229);
+    -webkit-text-stroke: 1px white;
+    border-radius: 10vh;
+}

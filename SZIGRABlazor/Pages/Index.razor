@@ -4,8 +4,7 @@
 @using SZIGRA.Algorithm
 @using SZIGRA.Enums
 @using SZIGRA.Player
-@using SZIGRAView.Board
-
+@using SZIGRABlazor.Board;
 <div>
     <div class="tictactoe-game">
         <Header />
@@ -16,7 +15,8 @@
                 <MudSelectItem Value="@(GameMode.PlayerVsPlayer)">Player vs Player</MudSelectItem>
                 <MudSelectItem Value="@(GameMode.ComputerVsComputer)">Computer vs Computer</MudSelectItem>
             </MudSelect>
-            <MudNumericField @bind-Value="BoardSize" Label="Board size" Variant="Variant.Text" Min="3" Max="5" Style="margin-bottom:1vh" />
+            <MudNumericField @bind-Value="BoardSize" Label="Board size" Variant="Variant.Text" Min="3" Max="10" Style="margin-bottom:1vh" />
+            <MudNumericField @bind-Value="MaxDepth" Label="Difficulty" Variant="Variant.Text" Min="1" Max="@(BoardSize*BoardSize-1)" Style="margin-bottom:1vh" />
             <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="OnStartButtonClicked">@StartButtonText</MudButton>
             <MudButton Variant="Variant.Filled" Color="Color.Info" OnClick="ComputerMove" StartIcon="@Icons.Material.Filled.Android" Disabled="@(isComputerMoving || isPlayer1Move == false)">
                 @if (isComputerMoving && isPlayer1Move)
@@ -42,7 +42,8 @@
                     <span>is moving</span>
             }
         </div>
-        <Board @ref="board"
+        <Board 
+               @ref="board"
                Width=@BoardSize
                Height=@BoardSize
                GameState="GameStateToDraw"
@@ -57,6 +58,7 @@
     //dodać obliczanie głębokości
     #region View
     int BoardSize = 3;
+    int MaxDepth = 8;
     GameMode pickedGameMode = GameMode.PlayerVsComputer;
     string StartButtonText = "START";
     bool isComputerMoving;
@@ -65,15 +67,15 @@
         isComputerMoving = true;
         await Task.Yield();
         var newState = await Task.Run(
-            () =>
+            async () =>
             {
 
-                StateHasChanged();
+                await InvokeAsync(()=>StateHasChanged());
                 return player1.MakeMove(ticTacToeGameState, 0, 0);
             }
         );
         MakeMove(newState);
-        StateHasChanged();
+        await InvokeAsync(()=>StateHasChanged());
         await board.GameStateChanged();
         isComputerMoving = false;
     }
@@ -83,7 +85,7 @@
 
         InitGame();
 
-        StateHasChanged();
+        await InvokeAsync(()=>StateHasChanged());
         await board.GameStateChanged();
     }
     void InitGame()
@@ -145,15 +147,14 @@
 
 
     }
-    Task PVC(int x, int y)
+    async Task PVC(int x, int y)
     {
         if (!isPlayer1Move)
         {
             var newState = player2.MakeMove(ticTacToeGameState, x, y);
             MakeMove(newState);
-            StateHasChanged();
+            await InvokeAsync(()=>StateHasChanged());
         }
-        return Task.CompletedTask;
 
     }
     void MakeMove(TicTacToeGameState newState)
