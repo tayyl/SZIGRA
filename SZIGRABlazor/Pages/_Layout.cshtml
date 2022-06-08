@@ -23,7 +23,23 @@
         function addElementClass(elementId,classToAdd) {
 
             const s = document.getElementById(elementId);
+           
             s.classList.add(classToAdd);
+        }
+        function removeElementStyle(elementId,style) {
+            const s = document.getElementById(elementId);
+            s.style.getPropertyValue(style)
+            s.style.removeProperty(style)
+        }
+        function removeElementStyles(elementId) {
+            const s = document.getElementById(elementId);
+            s.getAttribute("style");
+            s.removeAttribute("style");
+        }
+        function removeElementClass(elementId,classToRemove) {
+
+            const s = document.getElementById(elementId);
+            s.classList.remove(classToRemove);
         }
     </script>
 </head>
