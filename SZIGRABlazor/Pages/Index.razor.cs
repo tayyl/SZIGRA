@@ -5,8 +5,18 @@ using SZIGRA.Enums;
 using SZIGRA.Player;
 namespace SZIGRABlazor.Pages;
 
+enum GameMode
+{
+    PlayerVsPlayer = 0,
+    PlayerVsComputer = 1,
+    ComputerVsComputer = 2
+}
 partial class Index
 {
+    public Index()
+    {
+        InitGame();
+    }
     //dodać obliczanie głębokości
     #region View
     int BoardSize = 3;
@@ -18,96 +28,53 @@ partial class Index
     {
         isComputerMoving = true;
         await Task.Yield();
-        var newState = await Task.Run(
-            async () =>
-            {
-
-                await InvokeAsync(() => StateHasChanged());
-                return player1.MakeMove(ticTacToeGameState, 0, 0);
-            }
-        );
+        var newState = await Task.Run(() => isPlayer1Move ? player1.MakeMove(ticTacToeGameState, 0, 0) : player2.MakeMove(ticTacToeGameState, 0, 0));
         MakeMove(newState);
-        await InvokeAsync(() => StateHasChanged());
         await board.UpdateBoardState();
         isComputerMoving = false;
+        if (pickedGameMode == GameMode.PlayerVsComputer)
+        {
+            isComputerTurn = false;
+        }
     }
     async Task OnStartButtonClicked()
     {
         StartButtonText = "RESTART";
 
         InitGame();
-
+        ChangeGameMode();
         await board.ResetBoard();
         await InvokeAsync(() => StateHasChanged());
     }
-    void InitGame()
-    {
-        OnFieldClicked = PVC;
-        ticTacToeGameState = new TicTacToeGameState(BoardSize, BoardSize);
-        GameStateToDraw = new string[BoardSize, BoardSize];
-        player1 = new TicTacToeComputerPlayer(
-            new TicTacToeMiniMax(
-                GameResultEnum.Player1Won,
-                GameResultEnum.Player2Won,
-                PlayerEnum.Player1,
-                PlayerEnum.Player2,
-                double.NegativeInfinity,
-                double.PositiveInfinity,
-                MaxDepth
-            ),
-            PlayerEnum.Player1
-        );
-        player2 = new TicTacToePlayer(PlayerEnum.Player2);
-    }
+
     #endregion
     #region Game
-    enum GameMode
+    void InitGame()
     {
-        PlayerVsPlayer = 0,
-        PlayerVsComputer = 1,
-        ComputerVsComputer = 2
+        gameResult = GameResultEnum.GameOngoing;
+        ticTacToeGameState = new TicTacToeGameState(BoardSize, BoardSize);
+        GameStateToDraw = new string[BoardSize, BoardSize];
+        OnFieldClicked = (x, y) => Task.CompletedTask;
     }
-
     Func<int, int, Task> OnFieldClicked;
     Board.Board? board;
-    bool isPlayer1Move = false;
     TicTacToeGameState ticTacToeGameState;
     PlayerBase player1;
     PlayerBase player2;
     string[,] GameStateToDraw;
     GameResultEnum gameResult = GameResultEnum.GameOngoing;
     (int x, int y)[] winningCords;
-
-    public Index()
+    bool isPlayer1Move = false;
+    bool isComputerTurn = false;
+    async Task HumanPlayerMove(int x, int y)
     {
-        ticTacToeGameState = new TicTacToeGameState(BoardSize, BoardSize);
-        GameStateToDraw = new string[BoardSize, BoardSize];
-        player1 = new TicTacToeComputerPlayer(
-            new TicTacToeMiniMax(
-                GameResultEnum.Player1Won,
-                GameResultEnum.Player2Won,
-                PlayerEnum.Player1,
-                PlayerEnum.Player2,
-                double.NegativeInfinity,
-                double.PositiveInfinity,
-                MaxDepth
-            ),
-            PlayerEnum.Player1
-        );
-        player2 = new TicTacToePlayer(PlayerEnum.Player2);
-        OnFieldClicked = (x, y) => { return Task.CompletedTask; };
-
-
-    }
-    async Task PVC(int x, int y)
-    {
-        if (!isPlayer1Move)
+        if ((pickedGameMode == GameMode.PlayerVsComputer && isComputerTurn == false) || pickedGameMode == GameMode.PlayerVsPlayer)
         {
-            var newState = player2.MakeMove(ticTacToeGameState, x, y);
+            var newState = isPlayer1Move ? player1.MakeMove(ticTacToeGameState, x, y) : player2.MakeMove(ticTacToeGameState, x, y);
+            if (pickedGameMode == GameMode.PlayerVsComputer) isComputerTurn = true;
             MakeMove(newState);
             await InvokeAsync(() => StateHasChanged());
         }
-
     }
     void MakeMove(TicTacToeGameState newState)
     {
@@ -119,7 +86,7 @@ partial class Index
             var result = ticTacToeGameState.GetGameResult();
 
             gameResult = result.gameResult;
-            ChangeGameStateToDraw();
+            UpdateGameStateToDraw();
 
             if (gameResult != GameResultEnum.GameOngoing)
             {
@@ -128,16 +95,68 @@ partial class Index
 
         }
     }
+    void ChangeGameMode()
+    {
+        switch (pickedGameMode)
+        {
+            case GameMode.PlayerVsPlayer://ok
+                isPlayer1Move = false;
+                isComputerTurn = false;
+                player1 = new TicTacToePlayer(PlayerEnum.Player1);
+                player2 = new TicTacToePlayer(PlayerEnum.Player2);
+                OnFieldClicked = HumanPlayerMove;
 
-    //Task PVP()
-    //{
-
-    //}
-    //Task CVC()
-    //{
-
-    //}
-    void ChangeGameStateToDraw()
+                break;
+            case GameMode.PlayerVsComputer:
+                isPlayer1Move = true;
+                isComputerTurn = true;
+                player1 = new TicTacToeComputerPlayer(
+                           new TicTacToeMiniMax(
+                               GameResultEnum.Player1Won,
+                               GameResultEnum.Player2Won,
+                               PlayerEnum.Player1,
+                               PlayerEnum.Player2,
+                               double.NegativeInfinity,
+                               double.PositiveInfinity,
+                               MaxDepth
+                           ),
+                           PlayerEnum.Player1
+                       );
+                player2 = new TicTacToePlayer(PlayerEnum.Player2);
+                OnFieldClicked = HumanPlayerMove;
+                break;
+            case GameMode.ComputerVsComputer:
+                isComputerTurn = true;
+                OnFieldClicked = (x, y) => Task.CompletedTask;
+                player1 = new TicTacToeComputerPlayer(
+                           new TicTacToeMiniMax(
+                               GameResultEnum.Player1Won,
+                               GameResultEnum.Player2Won,
+                               PlayerEnum.Player1,
+                               PlayerEnum.Player2,
+                               double.NegativeInfinity,
+                               double.PositiveInfinity,
+                               MaxDepth
+                           ),
+                           PlayerEnum.Player1
+                       );
+                player2 = new TicTacToeComputerPlayer(
+                           new TicTacToeMiniMax(
+                               GameResultEnum.Player2Won,
+                               GameResultEnum.Player1Won,
+                               PlayerEnum.Player2,
+                               PlayerEnum.Player1,
+                               double.NegativeInfinity,
+                               double.PositiveInfinity,
+                               MaxDepth
+                           ),
+                           PlayerEnum.Player2
+                       );
+                isPlayer1Move = false;
+                break;
+        }
+    }
+    void UpdateGameStateToDraw()
     {
         var fontSize = (12 * 10) / (BoardSize * BoardSize);
         string player1Style = $"<span style=\"color: rgb(242,130,22); font-size: {fontSize}vh;\">O</span>";
@@ -152,5 +171,4 @@ partial class Index
         }
     }
     #endregion
-    //todo: ustawienia - pvp, pvc, ?cvc?
 }
