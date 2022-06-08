@@ -69,6 +69,7 @@ namespace SZIGRABlazor.Board
         }
         public async Task UpdateBoardState()
         {
+            await InvokeAsync(() => StateHasChanged());
             if (IsFinalMove())
             {
                 if (IsDraw())
@@ -103,6 +104,7 @@ namespace SZIGRABlazor.Board
             await Task.Delay(2000);
             BlurStyles = "filter: blur(8px); transition: all 2s ease;";
             ShowResultClass = "visible";
+            await InvokeAsync(() => StateHasChanged());
         }
         async Task SelectDraw()
         {

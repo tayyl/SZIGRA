@@ -152,5 +152,5 @@ partial class Index
         }
     }
     #endregion
-    //todo: ustawienia - pvp, pvc, ?cvc?, restart, move computer
+    //todo: ustawienia - pvp, pvc, ?cvc?
 }
