@@ -4,3 +4,14 @@
     width: 60vh;
     margin: auto;
 }
+.tictactoe-user-inputs {
+    padding: 10px;
+    margin: 5px;
+    display: flex;
+    background-color: rgb(102,179,233);
+    border-radius: 3vh;
+    width: 50%;
+    justify-content: space-around;
+    color: #6CD94E;
+    font-family: 'Bauhaus 93';
+}

@@ -11,39 +11,44 @@
         <div style="margin-bottom: 2vh">
 
             <MudSelect @bind-Value="pickedGameMode" Label="Select game-mode" AdornmentIcon="@Icons.Material.Filled.PlayCircle" AnchorOrigin="Origin.BottomCenter" AdornmentColor="Color.Secondary" Style="margin-bottom:1vh; width: 50px">
-                <MudSelectItem Value="@(GameMode.PlayerVsComputer)" > Player vs Computer</MudSelectItem>
-                <MudSelectItem Value="@(GameMode.PlayerVsPlayer)" >Player vs Player</MudSelectItem>
-                <MudSelectItem Value="@(GameMode.ComputerVsComputer)" >Computer vs Computer</MudSelectItem>
+                <MudSelectItem Value="@(GameMode.PlayerVsComputer)"> Player vs Computer</MudSelectItem>
+                <MudSelectItem Value="@(GameMode.PlayerVsPlayer)">Player vs Player</MudSelectItem>
+                <MudSelectItem Value="@(GameMode.ComputerVsComputer)">Computer vs Computer</MudSelectItem>
             </MudSelect>
             <MudNumericField @bind-Value="BoardSize" Label="Board size" Variant="Variant.Text" Min="3" Max="10" Style="margin-bottom:1vh" />
             <MudNumericField @bind-Value="MaxDepth" Label="Difficulty" Variant="Variant.Text" Min="1" Max="@(BoardSize*BoardSize-1)" Style="margin-bottom:1vh" />
-            <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="OnStartButtonClicked">@StartButtonText</MudButton>
-            <MudButton Variant="Variant.Filled" Color="Color.Info" OnClick="ComputerMove" StartIcon="@Icons.Material.Filled.Android" Disabled="@(isComputerMoving || isComputerTurn==false)">
-                @if (isComputerMoving && isPlayer1Move)
-                {
-                    <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
-                    <MudText Class="ms-2">Moving..</MudText>
-                }
-                else
-                {
-                    <MudText>MOVE</MudText>
-                }
-            </MudButton>
-            @if (StartButtonText == "RESTART")
-            {
-                    @if (isPlayer1Move)
+            <div style="display: flex; flex-direction: row">
+                <div class="tictactoe-user-inputs">
+                    <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="OnStartButtonClicked" Style="margin-right: 5px">@StartButtonText</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Info" OnClick="ComputerMove" StartIcon="@Icons.Material.Filled.Android" Disabled="@(isComputerMoving || isComputerTurn==false)">
+                        @if (isComputerMoving && isPlayer1Move)
+                        {
+                            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                            <MudText Class="ms-2">Moving..</MudText>
+                        }
+                        else
+                        {
+                            <MudText>MOVE</MudText>
+                        }
+                    </MudButton>
+
+                </div>
+                <div class="tictactoe-user-inputs" style="-webkit-text-stroke: 0.5px white; font-size: 2rem; padding: 0; vertical-align: central">
+                    @if (StartButtonText == "RESTART")
                     {
-                        <span style="color: rgb(242,130,22); font-size: 3vh;">O</span>
+                        @if (isPlayer1Move)
+                        {
+                            <span style="color: rgb(242,130,22);">O is moving</span>
+                        }
+                        else
+                        {
+                            <span style="color: rgb(0,134,229);">X is moving</span>
+                        }
                     }
-                    else
-                    {
-                        <span style="color: rgb(0,134,229);font-size: 3vh;">X</span>
-                    }
-                    <span>is moving</span>
-            }
+                </div>
+            </div>
         </div>
-        <Board 
-               @ref="board"
+        <Board @ref="board"
                Width=@BoardSize
                Height=@BoardSize
                GameState="GameStateToDraw"
