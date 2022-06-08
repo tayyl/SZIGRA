@@ -13,17 +13,58 @@ enum GameMode
 }
 partial class Index
 {
-    public Index()
-    {
-        InitGame();
-    }
-    //dodać obliczanie głębokości
-    #region View
     int BoardSize = 3;
     int MaxDepth = 8;
     GameMode pickedGameMode = GameMode.PlayerVsComputer;
     string StartButtonText = "START";
     bool isComputerMoving;
+
+    Func<int, int, Task> OnFieldClicked;
+    Board.Board? board;
+    TicTacToeGameState ticTacToeGameState;
+    PlayerBase player1;
+    PlayerBase player2;
+    string[,] GameStateToDraw;
+    GameResultEnum gameResult = GameResultEnum.GameOngoing;
+    (int x, int y)[] winningCords;
+    bool isPlayer1Move = false;
+    bool isComputerTurn = false;
+
+    public Index()
+    {
+        InitGame();
+    }
+    void InitGame()
+    {
+        gameResult = GameResultEnum.GameOngoing;
+        ticTacToeGameState = new TicTacToeGameState(BoardSize, BoardSize);
+        GameStateToDraw = new string[BoardSize, BoardSize];
+        OnFieldClicked = (x, y) => Task.CompletedTask;
+    }
+    void UpdateGameStateToDraw()
+    {
+        var fontSize = (12 * 10) / (BoardSize * BoardSize);
+        string player1Style = $"<span style=\"color: rgb(242,130,22); font-size: {fontSize}vh;\">O</span>";
+        string player2Style = $"<span style=\"color: rgb(0,134,229);font-size: {fontSize}vh;\">X</span>";
+        for (var i = 0; i < GameStateToDraw.GetLength(0); i++)
+        {
+            for (var j = 0; j < GameStateToDraw.GetLength(1); j++)
+            {
+                if (ticTacToeGameState[i, j] == PlayerEnum.None) continue;
+                GameStateToDraw[i, j] = ticTacToeGameState[i, j] == PlayerEnum.Player1 ? player1Style : player2Style;
+            }
+        }
+    }
+    async Task OnStartButtonClicked()
+    {
+        StartButtonText = "RESTART";
+
+        InitGame();
+        ChangeGameMode();
+        await board.ResetBoard();
+        await InvokeAsync(() => StateHasChanged());
+    }
+
     async Task ComputerMove()
     {
         isComputerMoving = true;
@@ -37,35 +78,6 @@ partial class Index
             isComputerTurn = false;
         }
     }
-    async Task OnStartButtonClicked()
-    {
-        StartButtonText = "RESTART";
-
-        InitGame();
-        ChangeGameMode();
-        await board.ResetBoard();
-        await InvokeAsync(() => StateHasChanged());
-    }
-
-    #endregion
-    #region Game
-    void InitGame()
-    {
-        gameResult = GameResultEnum.GameOngoing;
-        ticTacToeGameState = new TicTacToeGameState(BoardSize, BoardSize);
-        GameStateToDraw = new string[BoardSize, BoardSize];
-        OnFieldClicked = (x, y) => Task.CompletedTask;
-    }
-    Func<int, int, Task> OnFieldClicked;
-    Board.Board? board;
-    TicTacToeGameState ticTacToeGameState;
-    PlayerBase player1;
-    PlayerBase player2;
-    string[,] GameStateToDraw;
-    GameResultEnum gameResult = GameResultEnum.GameOngoing;
-    (int x, int y)[] winningCords;
-    bool isPlayer1Move = false;
-    bool isComputerTurn = false;
     async Task HumanPlayerMove(int x, int y)
     {
         if ((pickedGameMode == GameMode.PlayerVsComputer && isComputerTurn == false) || pickedGameMode == GameMode.PlayerVsPlayer)
@@ -156,19 +168,5 @@ partial class Index
                 break;
         }
     }
-    void UpdateGameStateToDraw()
-    {
-        var fontSize = (12 * 10) / (BoardSize * BoardSize);
-        string player1Style = $"<span style=\"color: rgb(242,130,22); font-size: {fontSize}vh;\">O</span>";
-        string player2Style = $"<span style=\"color: rgb(0,134,229);font-size: {fontSize}vh;\">X</span>";
-        for (var i = 0; i < GameStateToDraw.GetLength(0); i++)
-        {
-            for (var j = 0; j < GameStateToDraw.GetLength(1); j++)
-            {
-                if (ticTacToeGameState[i, j] == PlayerEnum.None) continue;
-                GameStateToDraw[i, j] = ticTacToeGameState[i, j] == PlayerEnum.Player1 ? player1Style : player2Style;
-            }
-        }
-    }
-    #endregion
+   
 }
